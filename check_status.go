@@ -21,36 +21,68 @@ func checkStatus(baseURL string, maxConcurrent int) {
 		return
 	}
 
-	// Get all links first
-	urls, err := getAllLinks(baseURL)
-	if err != nil {
-		fmt.Printf("Error getting links: %v\n", err)
-		return
-	}
-
+	visited := make(map[string]bool)
 	results := make(chan StatusResult)
 	var wg sync.WaitGroup
 	semaphore := make(chan struct{}, maxConcurrent)
+	var mu sync.Mutex
 
-	// Start workers for each URL
-	for _, link := range urls {
-		if !isInternalLink(parsedURL, link) {
-			continue
+	// Recursive function to check links
+	var checkLinksRecursive func(currentURL string)
+	checkLinksRecursive = func(currentURL string) {
+		defer wg.Done()
+
+		mu.Lock()
+		if visited[currentURL] {
+			mu.Unlock()
+			return
 		}
-		wg.Add(1)
-		go func(url string) {
-			defer wg.Done()
-			semaphore <- struct{}{}        // Acquire
-			defer func() { <-semaphore }() // Release
+		visited[currentURL] = true
+		mu.Unlock()
 
-			status, err := getStatus(url)
-			results <- StatusResult{
-				URL:        url,
-				StatusCode: status,
-				Error:      err,
+		// Check status of current URL
+		semaphore <- struct{}{} // Acquire
+		status, err := getStatus(currentURL)
+		<-semaphore // Release
+
+		results <- StatusResult{
+			URL:        currentURL,
+			StatusCode: status,
+			Error:      err,
+		}
+
+		// If this page is accessible, get its links
+		if err == nil && status < 400 {
+			links, err := getAllLinks(currentURL)
+			if err != nil {
+				fmt.Printf("Error getting links from %s: %v\n", currentURL, err)
+				return
 			}
-		}(link)
+
+			// Process internal links
+			for _, link := range links {
+				if !isInternalLink(parsedURL, link) {
+					continue
+				}
+
+				mu.Lock()
+				notVisited := !visited[link]
+				mu.Unlock()
+
+				if notVisited {
+					wg.Add(1)
+					go checkLinksRecursive(link)
+				}
+			}
+		}
 	}
+
+	// Start the recursive crawl
+	fmt.Printf("\nStarting deep health check of %s\n", baseURL)
+	fmt.Println("This may take a while depending on the site size...\n")
+
+	wg.Add(1)
+	go checkLinksRecursive(baseURL)
 
 	// Close results channel when all workers are done
 	go func() {
@@ -59,7 +91,7 @@ func checkStatus(baseURL string, maxConcurrent int) {
 	}()
 
 	// Print results as they come in
-	fmt.Printf("\nHealth Status Report for %s\n", baseURL)
+	fmt.Printf("Health Status Report for %s\n", baseURL)
 	fmt.Println("=====================================")
 
 	for result := range results {
@@ -68,7 +100,11 @@ func checkStatus(baseURL string, maxConcurrent int) {
 			continue
 		}
 		statusText := http.StatusText(result.StatusCode)
-		fmt.Printf("%-50s Status: %d %s\n", result.URL, result.StatusCode, statusText)
+		statusSymbol := "✓"
+		if result.StatusCode >= 400 {
+			statusSymbol = "✗"
+		}
+		fmt.Printf("%s %-50s Status: %d %s\n", statusSymbol, result.URL, result.StatusCode, statusText)
 	}
 }
 
