@@ -29,6 +29,5 @@ func getHTML(rawURL string) (string, error) {
 	}
 
 	htmlBody := string(htmlBodyBytes)
-
 	return htmlBody, nil
 }
