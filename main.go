@@ -6,40 +6,93 @@ import (
 	"strconv"
 )
 
+const (
+	defaultMaxConcurrency = 10
+	defaultMaxPages       = 20
+)
+
 func main() {
-	if len(os.Args) < 4 {
-		fmt.Println("not enough arguments provided")
-		fmt.Println("usage: crawler <baseURL> <maxConcurrency> <maxPages>")
+	if len(os.Args) < 2 {
+		printUsage()
 		return
 	}
 
-	if len(os.Args) > 4 {
-		fmt.Println("too many arguments provided")
+	command := os.Args[1]
+
+	switch command {
+	case "crawl":
+		handleCrawl(os.Args[2:])
+	case "status":
+		handleStatus(os.Args[2:])
+	default:
+		printUsage()
+	}
+}
+
+func printUsage() {
+	fmt.Println("Usage:")
+	fmt.Println("  crawler crawl <url> [maxConcurrency] [maxPages]")
+	fmt.Println("  crawler status <url> [maxConcurrency]")
+	fmt.Printf("Defaults: maxConcurrency=%d, maxPages=%d\n",
+		defaultMaxConcurrency, defaultMaxPages)
+}
+
+func handleStatus(args []string) {
+	if len(args) < 1 {
+		fmt.Println("Error: URL is required for status check")
 		return
 	}
-	rawBaseURL := os.Args[1]
-	maxConcurrencyString := os.Args[2]
-	maxPagesStrting := os.Args[3]
 
-	maxConcurrency, err := strconv.Atoi(maxConcurrencyString)
-	if err != nil {
-		fmt.Printf("Error - maxConcurrency: %v", err)
+	url := args[0]
+	maxConcurrent := defaultMaxConcurrency
+
+	if len(args) >= 2 {
+		if mc, err := strconv.Atoi(args[1]); err == nil {
+			maxConcurrent = mc
+		}
+	}
+
+	checkStatus(url, maxConcurrent)
+}
+
+func handleCrawl(args []string) {
+	if len(args) < 1 {
+		fmt.Println("Error: URL is required")
+		fmt.Println("Usage: crawler <url> [maxConcurrency] [maxPages]")
+		fmt.Printf("Default maxConcurrency: %d, Default maxPages: %d\n",
+			defaultMaxConcurrency, defaultMaxPages)
 		return
 	}
 
-	maxPages, err := strconv.Atoi(maxPagesStrting)
-	if err != nil {
-		fmt.Printf("Error - maxPages: %v", err)
-		return
+	rawBaseURL := args[0]
+	maxConcurrency := defaultMaxConcurrency
+	maxPages := defaultMaxPages
+
+	if len(args) >= 2 {
+		if mc, err := strconv.Atoi(args[1]); err == nil {
+			maxConcurrency = mc
+		} else {
+			fmt.Printf("Warning: invalid maxConcurrency, using default: %d\n", defaultMaxConcurrency)
+		}
+	}
+
+	if len(args) >= 3 {
+		if mp, err := strconv.Atoi(args[2]); err == nil {
+			maxPages = mp
+		} else {
+			fmt.Printf("Warning: invalid maxPages, using default: %d\n", defaultMaxPages)
+		}
 	}
 
 	cfg, err := configure(rawBaseURL, maxConcurrency, maxPages)
 	if err != nil {
-		fmt.Printf("Error - configure: %v", err)
+		fmt.Printf("Error - configure: %v\n", err)
 		return
 	}
 
-	fmt.Printf("starting crawl of: %s...\n", rawBaseURL)
+	fmt.Printf("Starting crawl of: %s\n", rawBaseURL)
+	fmt.Printf("Max concurrent requests: %d\n", maxConcurrency)
+	fmt.Printf("Max pages to crawl: %d\n", maxPages)
 
 	cfg.wg.Add(1)
 	go cfg.crawlPage(rawBaseURL)
