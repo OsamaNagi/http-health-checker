@@ -82,7 +82,7 @@ func checkStatus(baseURL string, maxConcurrent int) {
 
 	// Start the recursive crawl
 	fmt.Printf("\nStarting deep health check of %s\n", baseURL)
-	fmt.Println("This may take a while depending on the site size...\n")
+	fmt.Println("This may take a while depending on the site size...")
 
 	wg.Add(1)
 	go checkLinksRecursive(baseURL)
