@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/OsamaNagi/crawler/ratelimit"
+	"github.com/OsamaNagi/http-health-crawler/ratelimit"
 )
 
 type StatusResult struct {

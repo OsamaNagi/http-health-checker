@@ -1,4 +1,4 @@
-module github.com/OsamaNagi/crawler
+module github.com/OsamaNagi/http-health-crawler
 
 go 1.24.0
 

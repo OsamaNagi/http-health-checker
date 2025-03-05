@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	. "github.com/OsamaNagi/crawler/internal"
+	. "github.com/OsamaNagi/http-health-crawler/internal"
 )
 
 func main() {

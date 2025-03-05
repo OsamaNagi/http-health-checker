@@ -1,4 +1,7 @@
-# Go Web Crawler
+# Go Http Health crawler
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/OsamaNagi/crawler)](https://goreportcard.com/report/github.com/OsamaNagi/crawler)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 A fast and efficient web crawler that performs deep health checks on websites. This tool crawls through internal links of a website and reports their HTTP status, content types, and any errors encountered.
 
@@ -113,7 +116,58 @@ The crawler handles various types of errors:
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit pull requests.
+We welcome contributions to improve the web crawler! Here's how you can help:
+
+### Development Setup
+
+1. Fork the repository
+2. Create your feature branch:
+
+```bash
+git checkout -b feature/amazing-feature
+```
+
+3. Set up your local development environment:
+
+```bash
+go mod tidy
+go mod verify
+```
+
+### Coding Standards
+
+- Follow Go best practices and idioms
+- Use meaningful variable and function names
+- Add comments for complex logic
+- Write tests for new features
+- Run `go fmt` before committing
+
+### Testing
+
+Please ensure your code passes all tests:
+
+```bash
+go test ./...
+```
+
+### Pull Request Process
+
+1. Update the README.md with details of changes if applicable
+2. Update any relevant documentation
+3. Make sure your code lints and tests pass
+4. Create a Pull Request with a clear title and description
+5. Link any relevant issues in your PR description
+
+### Bug Reports
+
+When filing an issue, please include:
+
+- Your Go version (`go version`)
+- Operating system and version
+- Steps to reproduce the issue
+- Expected behavior
+- Actual behavior
+- Any relevant logs or error messages
 
 ## License
 
