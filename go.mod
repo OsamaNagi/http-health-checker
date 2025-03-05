@@ -1,4 +1,4 @@
-module github.com/OsamaNagi/http-health-crawler
+module github.com/OsamaNagi/http-health-checker
 
 go 1.24.0
 

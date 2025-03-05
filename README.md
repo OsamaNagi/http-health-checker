@@ -1,6 +1,6 @@
-# Go Http Health crawler
+# Go Http Health Checker
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/OsamaNagi/crawler)](https://goreportcard.com/report/github.com/OsamaNagi/crawler)
+[![Go Report Card](https://goreportcard.com/badge/github.com/OsamaNagi/http-health-checker)](https://goreportcard.com/report/github.com/OsamaNagi/http-health-checker)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 A fast and efficient web crawler that performs deep health checks on websites. This tool crawls through internal links of a website and reports their HTTP status, content types, and any errors encountered.
@@ -26,8 +26,8 @@ A fast and efficient web crawler that performs deep health checks on websites. T
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/OsamaNagi/crawler.git
-cd crawler
+git clone https://github.com/OsamaNagi/http-health-checker.git
+cd http-health-checker
 ```
 
 2. Install dependencies:
@@ -39,7 +39,7 @@ go mod tidy
 3. Build the binary:
 
 ```bash
-go build -o crawler
+go build -o http-health-checker
 ```
 
 ## Usage
@@ -47,7 +47,7 @@ go build -o crawler
 ### Basic Command
 
 ```bash
-./crawler status <url> [maxConcurrency] [requestsPerHost] [rateInterval]
+./http-health-checker status <url> [maxConcurrency] [requestsPerHost] [rateInterval]
 ```
 
 ### Parameters
@@ -62,19 +62,19 @@ go build -o crawler
 1. Basic usage:
 
 ```bash
-./crawler status example.com
+./http-health-checker status example.com
 ```
 
 2. With custom concurrency:
 
 ```bash
-./crawler status example.com 20
+./http-health-checker status example.com 20
 ```
 
 3. With custom rate limiting:
 
 ```bash
-./crawler status example.com 10 50 1m
+./http-health-checker status example.com 10 50 1m
 ```
 
 ## Output Format
