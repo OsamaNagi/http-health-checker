@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 )
 
 type StatusResult struct {
-	URL        string
-	StatusCode int
-	Error      error
+	URL         string
+	StatusCode  int
+	ContentType string
+	Error       error
 }
 
 func checkStatus(baseURL string, maxConcurrent int) {
@@ -42,17 +44,18 @@ func checkStatus(baseURL string, maxConcurrent int) {
 
 		// Check status of current URL
 		semaphore <- struct{}{} // Acquire
-		status, err := getStatus(currentURL)
+		status, contentType, err := getStatus(currentURL)
 		<-semaphore // Release
 
 		results <- StatusResult{
-			URL:        currentURL,
-			StatusCode: status,
-			Error:      err,
+			URL:         currentURL,
+			StatusCode:  status,
+			ContentType: contentType,
+			Error:       err,
 		}
 
-		// If this page is accessible, get its links
-		if err == nil && status < 400 {
+		// Only crawl further if it's an HTML page
+		if err == nil && status < 400 && strings.Contains(contentType, "text/html") {
 			links, err := getAllLinks(currentURL)
 			if err != nil {
 				fmt.Printf("Error getting links from %s: %v\n", currentURL, err)
@@ -99,16 +102,28 @@ func checkStatus(baseURL string, maxConcurrent int) {
 			fmt.Printf("%-50s Error: %v\n", result.URL, result.Error)
 			continue
 		}
+
 		statusText := http.StatusText(result.StatusCode)
 		statusSymbol := "✓"
 		if result.StatusCode >= 400 {
 			statusSymbol = "✗"
 		}
-		fmt.Printf("%s %-50s Status: %d %s\n", statusSymbol, result.URL, result.StatusCode, statusText)
+
+		contentInfo := ""
+		if !strings.Contains(result.ContentType, "text/html") {
+			contentInfo = fmt.Sprintf(" (%s)", result.ContentType)
+		}
+
+		fmt.Printf("%s %-50s Status: %d %s%s\n",
+			statusSymbol,
+			result.URL,
+			result.StatusCode,
+			statusText,
+			contentInfo)
 	}
 }
 
-func getStatus(url string) (int, error) {
+func getStatus(url string) (int, string, error) {
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -118,10 +133,12 @@ func getStatus(url string) (int, error) {
 
 	resp, err := client.Get(url)
 	if err != nil {
-		return 0, err
+		return 0, "", err
 	}
 	defer resp.Body.Close()
-	return resp.StatusCode, nil
+
+	contentType := resp.Header.Get("Content-Type")
+	return resp.StatusCode, contentType, nil
 }
 
 func getAllLinks(baseURL string) ([]string, error) {
