@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/OsamaNagi/crawler/internal/ratelimit"
+	"github.com/OsamaNagi/crawler/ratelimit"
 )
 
 type StatusResult struct {
@@ -24,7 +24,7 @@ type CrawlConfig struct {
 	RateInterval    time.Duration
 }
 
-func checkStatus(baseURL string, config CrawlConfig) {
+func CheckStatus(baseURL string, config CrawlConfig) {
 	parsedURL, err := url.Parse(baseURL)
 	if err != nil {
 		fmt.Printf("Error parsing URL: %v\n", err)
@@ -156,7 +156,7 @@ func getStatus(url string) (int, string, error) {
 }
 
 func getAllLinks(baseURL string) ([]string, error) {
-	htmlBody, err := getHTML(baseURL)
+	htmlBody, err := GetHTML(baseURL)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +166,7 @@ func getAllLinks(baseURL string) ([]string, error) {
 		return nil, err
 	}
 
-	return getURLsFromHTML(htmlBody, parsedURL)
+	return GetURLsFromHTML(htmlBody, parsedURL)
 }
 
 func isInternalLink(baseURL *url.URL, link string) bool {

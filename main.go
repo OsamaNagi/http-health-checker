@@ -5,6 +5,8 @@ import (
 	"os"
 	"strconv"
 	"time"
+
+	. "github.com/OsamaNagi/crawler/internal"
 )
 
 const (
@@ -67,5 +69,5 @@ func handleStatus(args []string) {
 		}
 	}
 
-	checkStatus(url, config)
+	CheckStatus(url, config)
 }

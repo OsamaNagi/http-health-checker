@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func getHTML(rawURL string) (string, error) {
+func GetHTML(rawURL string) (string, error) {
 	res, err := http.Get(rawURL)
 	if err != nil {
 		return "", fmt.Errorf("got network error: %v", err)
