@@ -1,6 +1,8 @@
 # Go Http Health Checker
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/OsamaNagi/http-health-checker)](https://goreportcard.com/report/github.com/OsamaNagi/http-health-checker)
+[![Build Status](https://travis-ci.com/OsamaNagi/http-health-checker.svg?branch=main)](https://travis-ci.com/OsamaNagi/http-health-checker)
+[![Coverage Status](https://coveralls.io/repos/github/OsamaNagi/http-health-checker/badge.svg?branch=main)](https://coveralls.io/github/OsamaNagi/http-health-checker?branch=main)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 A fast and efficient web crawler that performs deep health checks on websites. This tool crawls through internal links of a website and reports their HTTP status, content types, and any errors encountered.
