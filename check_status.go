@@ -7,6 +7,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/OsamaNagi/crawler/internal/ratelimit"
 )
 
 type StatusResult struct {
@@ -16,7 +18,13 @@ type StatusResult struct {
 	Error       error
 }
 
-func checkStatus(baseURL string, maxConcurrent int) {
+type CrawlConfig struct {
+	MaxConcurrent   int
+	RequestsPerHost int
+	RateInterval    time.Duration
+}
+
+func checkStatus(baseURL string, config CrawlConfig) {
 	parsedURL, err := url.Parse(baseURL)
 	if err != nil {
 		fmt.Printf("Error parsing URL: %v\n", err)
@@ -26,8 +34,11 @@ func checkStatus(baseURL string, maxConcurrent int) {
 	visited := make(map[string]bool)
 	results := make(chan StatusResult)
 	var wg sync.WaitGroup
-	semaphore := make(chan struct{}, maxConcurrent)
+	semaphore := make(chan struct{}, config.MaxConcurrent)
 	var mu sync.Mutex
+
+	// Add rate limiter
+	rateLimiter := ratelimit.NewRateLimiter(config.RequestsPerHost, config.RateInterval)
 
 	// Recursive function to check links
 	var checkLinksRecursive func(currentURL string)
@@ -41,6 +52,9 @@ func checkStatus(baseURL string, maxConcurrent int) {
 		}
 		visited[currentURL] = true
 		mu.Unlock()
+
+		// Add rate limiting
+		rateLimiter.Wait(currentURL)
 
 		// Check status of current URL
 		semaphore <- struct{}{} // Acquire

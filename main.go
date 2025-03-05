@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 )
 
 const (
-	defaultMaxConcurrency = 10
+	defaultMaxConcurrency  = 10
+	defaultRequestsPerHost = 30
+	defaultRateInterval    = 30 * time.Second
 )
 
 func main() {
@@ -28,9 +31,11 @@ func main() {
 
 func printUsage() {
 	fmt.Println("Usage:")
-	fmt.Println("  crawler status <url> [maxConcurrency]")
-	fmt.Printf("Defaults: maxConcurrency=%d\n",
-		defaultMaxConcurrency)
+	fmt.Println("  crawler status <url> [maxConcurrency] [requestsPerHost] [rateInterval]")
+	fmt.Printf("Defaults: maxConcurrency=%d, requestsPerHost=%d, rateInterval=%v\n",
+		defaultMaxConcurrency,
+		defaultRequestsPerHost,
+		defaultRateInterval)
 }
 
 func handleStatus(args []string) {
@@ -40,13 +45,27 @@ func handleStatus(args []string) {
 	}
 
 	url := args[0]
-	maxConcurrent := defaultMaxConcurrency
+	config := CrawlConfig{
+		MaxConcurrent:   defaultMaxConcurrency,
+		RequestsPerHost: defaultRequestsPerHost,
+		RateInterval:    defaultRateInterval,
+	}
 
 	if len(args) >= 2 {
 		if mc, err := strconv.Atoi(args[1]); err == nil {
-			maxConcurrent = mc
+			config.MaxConcurrent = mc
+		}
+	}
+	if len(args) >= 3 {
+		if rph, err := strconv.Atoi(args[2]); err == nil {
+			config.RequestsPerHost = rph
+		}
+	}
+	if len(args) >= 4 {
+		if d, err := time.ParseDuration(args[3]); err == nil {
+			config.RateInterval = d
 		}
 	}
 
-	checkStatus(url, maxConcurrent)
+	checkStatus(url, config)
 }
